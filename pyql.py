@@ -3,8 +3,14 @@ import sys
 import os
 import time
 from pathlib import Path
+unlockcmd = False
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
+def helpmenu():
+    print("options: \n list tables (lsT), update values(updV) \n insert values (insV), delete values (delV) \n list all value \n find value")
+    print("create table (crtT), delete table (delT) \n run sql query (SQLCMD)")
+    time.sleep(5)
+    main()
 try:
     def setup():
         clear()
@@ -24,9 +30,12 @@ try:
         clear()
         print(f'connected to {db}')
         userinp = input("enter operation: ")
+        if userinp == "help":
+            helpmenu()
         if userinp == "lsT":
              query = "SELECT name FROM sqlite_master WHERE type='table';"
              cursor.execute(query)
+             print(f"Tables in {db}")
              print(cursor.fetchall())
              time.sleep(5)
              main()
@@ -39,6 +48,8 @@ try:
              query = f"UPDATE {tblname} SET {upcolname} = '{valname}' WHERE {upcolname} ='{oldvalname}'"
              cursor.execute(query)
              SQLDB.commit()
+             print(f"updated {tablname} with the new value {valname} in the column {upcolname}, replacing {oldvalname}")
+             time.sleep(3)
              main()
         if userinp == "insV":
              clear()
@@ -48,6 +59,8 @@ try:
              query = f"INSERT INTO {tablname} ({incolname}) VALUES ('{addval}')"
              cursor.execute(query)
              SQLDB.commit()
+             print(f"inserted value {addval} into {incolname} in {tablname}")
+             time.sleep(3)
              main()
         if userinp == "del":
              clear()
@@ -58,6 +71,8 @@ try:
              query = f"DELETE FROM {tablname} WHERE {valname} {operator} '{valwhere}'"
              cursor.execute(query)
              SQLDB.commit()
+             print(f"deleted {valname} from {tablname} where {valname} {operator} {valwhere}")
+             time.sleep(3)
              main()
         if userinp == "crtT":
              tablname = input("enter table name: ")
@@ -65,6 +80,8 @@ try:
              query = f"CREATE TABLE {tablname} ({column} TEXT)"
              cursor.execute(query)
              SQLDB.commit()
+             print(f"created {tablname} with the column {column}")
+             time.sleep(3)
              main()
         if userinp == "delT":
              clear()
@@ -75,12 +92,14 @@ try:
                  query = f"DROP TABLE {tablname}"
                  cursor.execute(query)
                  SQLDB.commit()
+                 print(f"deleted {tablname}")
+                 time.sleep(3)
                  main()
              else:
               print("cancelling operation")
               time.sleep(3)
               main()
-        if userinp.upper() == "SQLCMD":
+        if userinp.upper() == "SQLCMD" and unlockcmd == True:
             clear()
             cmd = input("Enter sql cmd: ")
             fetching = input("fetching vals: ")
@@ -89,12 +108,13 @@ try:
                 print(cursor.fetchall())
                 time.sleep(5)
                 main()
-            elif "DROP" or "DELETE" in cmd:
+            elif "DROP" in cmd or "DELETE" in cmd:
                 print("are you sure you want to execute this? \n it contains permanent value modifications")
                 sure = input("yes/no: ")
                 if sure.lower() == "yes":
                     cursor.execute(cmd)
                     SQLDB.commit()
+                    print(f"executed {cmd}")
                     main()
                 else:
                     print("operation cancelled, returning to main menu")
@@ -103,12 +123,21 @@ try:
             else:
                 cursor.execute(cmd)
                 SQLDB.commit()
+                print(f"executed {cmd}")
+                time.sleep(3)
                 main()
-                
+        elif userinp.upper() == "SQLCMD" and unlockcmd == False:
+            print("advance mode is locked, please launch the script again using the -u argument")
+        if userinp.lower() == "quit" or userinp.lower() == "exit":
+            quit()
     args = sys.argv[1:]
     if  len(args)>0 and args[0].lower() == "-h":
-        print("options: \n list tables (lsT), update values(updV) \n insert values (insV), delete values (delV) \n list all value \n find value")
-        print("create table (crtT), delete table (delT) \n run sql query (SQLCMD)")
+        helpmenu()
+    elif len(args)>0 and args[0].lower() == "-u":
+        print("unlocked advance mode")
+        unlockcmd = True
+        time.sleep(3)
+        setup()
     else:
         setup()
 except KeyboardInterrupt:
