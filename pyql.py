@@ -42,13 +42,21 @@ try:
         if userinp == "updV":
              clear()
              tblname = input("enter table name: ")
-             upcolname = input("column name: ")
-             valname = input("new value: ")
-             oldvalname = input("old value: ")
-             query = f"UPDATE {tblname} SET {upcolname} = '{valname}' WHERE {upcolname} ='{oldvalname}'"
-             cursor.execute(query)
-             SQLDB.commit()
-             print(f"updated {tablname} with the new value {valname} in the column {upcolname}, replacing {oldvalname}")
+             try:
+                amounttoupd = int(input("enter how many values you want to update: "))
+             except ValueError:
+                 print("please type an integer")
+                 time.sleep(2)
+                 main()
+             for i in range(0,amounttoupd):
+                upcolname = input("column name: ")
+                valname = input("new value: ")
+                oldvalname = input("old value: ")
+                query = f"UPDATE {tblname} SET {upcolname} = '{valname}' WHERE {upcolname} ='{oldvalname}'"
+                cursor.execute(query)
+                SQLDB.commit()
+                print(f"updated {tblname} with the new value {valname} in the column {upcolname}, replacing {oldvalname}")
+                time.sleep(1)
              time.sleep(3)
              main()
         if userinp == "insV":
