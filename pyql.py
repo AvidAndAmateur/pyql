@@ -88,7 +88,7 @@ try:
                  time.sleep(2)
                  main()
              for i in range(0,howmanycols):
-                for i in range(0,howmanyvals):
+                for x in range(0,howmanyvals):
                     incolname = input("enter column name: ")
                     addval = input("value to add: ")
                     query = f"INSERT INTO {tablname} ({incolname}) VALUES ('{addval}')"
@@ -190,17 +190,15 @@ try:
                             cursor.execute(cmd)
                             SQLDB.commit()
                             print(f"executed {cmd}")
-                            main()
                         else:
                             print("operation cancelled, returning to main menu")
                             time.sleep(3)
-                            main()
                     else:
                      cursor.execute(cmd)
                      SQLDB.commit()
                      print(f"executed {cmd}")
                      time.sleep(3)
-                     main()
+                main()
             except ValueError:
                 print("please enter an integer")
                 time.sleep(2)
@@ -209,8 +207,9 @@ try:
             print("advance mode is locked, please launch the script again using the -u argument")
         if userinp.lower() == "quit" or userinp.lower() == "exit":
             SQLDB.close()
-            logfile.close()
-            quit()
+            if uselogfile == True:
+                logfile.close()
+            sys.exit()
     args = sys.argv[1:]
     if  len(args)>0 and args[0].lower() == "-h":
         helpmenu()
@@ -224,6 +223,13 @@ try:
     else:
         setup()
 except KeyboardInterrupt:
-    SQLDB.close()
-    logfile.close()
+    try:
+        SQLDB.close()
+    except:
+        pass
+    if uselogfile == True:
+        try:
+            logfile.close()
+        except:
+            pass
     clear()
